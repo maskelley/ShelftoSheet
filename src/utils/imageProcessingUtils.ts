@@ -21,7 +21,7 @@ export interface ProductData {
 export const processImageWithType = async (
   imageData: string, 
   type: string | null, 
-  onSuccess: (products: ProductData[]) => void,
+  onSuccess: (products: ProductData[], rawResponse: string) => void,
   onError: () => void,
   setIsProcessing: (state: boolean) => void
 ): Promise<void> => {
@@ -35,15 +35,16 @@ export const processImageWithType = async (
     
     // Attempt to process with AI vision from aiVisionUtils
     console.log("Calling processImageWithVision...");
-    const products = await processImageWithVision(imageData, productType);
-    console.log("Products detected by AI vision:", products);
+    const { detectedProducts, rawResponse } = await processImageWithVision(imageData, productType);
+    console.log("Products detected by AI vision:", detectedProducts);
+    console.log("Raw API response captured in imageProcessingUtils:", rawResponse.substring(0,100));
 
-    if (products && products.length > 0) {
+    if (detectedProducts && detectedProducts.length > 0) {
       console.log("Products successfully detected. Calling onSuccess...");
-      onSuccess(products);
+      onSuccess(detectedProducts, rawResponse);
     } else {
-      console.warn("No products detected by AI vision.");
-      onError();
+      console.warn("No products detected by AI vision, calling onSuccess with empty product list and raw response.");
+      onSuccess([], rawResponse);
     }
   } catch (error) {
     console.error("Error in processImageWithType:", error);
