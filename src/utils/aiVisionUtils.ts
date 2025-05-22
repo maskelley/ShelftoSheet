@@ -21,7 +21,8 @@ const API_BASE_URL = "https://api.openai.com/v1";
 export const processImageWithVision = async (
   imageData: string,
   productType: string
-): Promise<ProductData[]> => {
+): Promise<{ detectedProducts: ProductData[]; rawResponse: string }> => {
+  let responseText: string = "";
   try {
     console.log(`Processing ${productType} image with OpenAI Vision API directly...`);
     
@@ -44,7 +45,7 @@ export const processImageWithVision = async (
           content: [
             { 
               type: "text", 
-              text: `What ${productType} products do you see? Return results as a JSON array with format: [{"name": "Product Name", "brand": "Brand Name", "confidence": 0.95}]`
+              text: `Identify all distinct ${productType} products in the image. Provide a JSON array where each object represents a product and includes 'name', 'brand', and 'confidence'. For example: [{'name': 'Product A', 'brand': 'Brand X', 'confidence': 0.9}, {'name': 'Product B', 'brand': 'Brand Y', 'confidence': 0.8}]. If no products are found, return an empty array.`
             },
             { 
               type: "image_url",
@@ -65,8 +66,9 @@ export const processImageWithVision = async (
     console.log("API response received directly from OpenAI");
     
     // Extract the response content - keep your existing processing code
-    const responseText = response.data.choices[0].message.content;
+    responseText = response.data.choices[0].message.content; // Assign to the initialized responseText
     console.log("Response text:", responseText.substring(0, 100) + "..."); // Log only part to avoid huge logs
+    console.log("Raw API Response Text:", responseText);
     
     // Parse the JSON response with improved extraction
     let products = [];
@@ -93,13 +95,10 @@ export const processImageWithVision = async (
       console.log("Successfully parsed products data");
     } catch (parseError) {
       console.error("Error parsing response:", parseError);
-      console.log("Raw response:", responseText);
+      console.log("Raw API Response Text:", responseText); // Ensure this uses the correct variable
       // Fallback approach
-      products = [{
-        name: `${productType} product`,
-        brand: "Unknown",
-        confidence: 0.5
-      }];
+      console.error("Failed to parse JSON response after multiple attempts. Returning empty array.");
+      return { detectedProducts: [], rawResponse: responseText };
     }
 
     // Convert the parsed products to our app's product data format
@@ -114,13 +113,16 @@ export const processImageWithVision = async (
     }));
 
     console.log(`Detected ${detectedProducts.length} products`);
-    return detectedProducts;
+    return { detectedProducts, rawResponse: responseText };
   } catch (error) {
     console.error("Error processing image:", error);
     if (axios.isAxiosError(error)) {
       console.error("API response:", error.response?.data);
       console.error("API status:", error.response?.status);
     }
+    // If responseText is available, we could return it, but typically errors here are network/auth before responseText is populated.
+    // For now, re-throwing the error is consistent with previous behavior for these pre-responseText errors.
+    // If specific handling for returning partial data even on some axios errors is needed, this could be expanded.
     throw new Error(`Failed to process image: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 };

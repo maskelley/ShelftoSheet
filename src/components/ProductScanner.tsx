@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea"; // Added import
 import { Camera } from "lucide-react";
 import { ProductData } from "@/types/product";
 import { useToast } from "@/components/ui/use-toast";
@@ -23,6 +24,7 @@ const ProductScanner: React.FC<ProductScannerProps> = ({
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [imageType, setImageType] = useState<string | null>(null);
   const [showCamera, setShowCamera] = useState(false);
+  const [rawApiResponse, setRawApiResponse] = useState<string | null>(null); // Added state
   const { toast } = useToast();
 
   const handleCameraCapture = (imageData: string) => {
@@ -40,12 +42,13 @@ const ProductScanner: React.FC<ProductScannerProps> = ({
     processImageWithType(
       imageData, 
       null, // passing null lets the system detect the type
-      (products) => {
+      (products, rawResponse) => { // Updated callback signature
         toast({
           title: "Analysis Complete",
           description: `Found ${products.length} products on the shelf!`,
         });
         onProductsDetected(products);
+        setRawApiResponse(rawResponse); // Added line
       },
       () => {
         toast({
@@ -70,12 +73,13 @@ const ProductScanner: React.FC<ProductScannerProps> = ({
     processImageWithType(
       imageData, 
       detectedType, 
-      (products) => {
+      (products, rawResponse) => { // Updated callback signature
         toast({
           title: "Analysis Complete",
           description: `Found ${products.length} ${detectedType} products!`,
         });
         onProductsDetected(products);
+        setRawApiResponse(rawResponse); // Added line
       },
       () => {
         toast({
@@ -123,6 +127,18 @@ const ProductScanner: React.FC<ProductScannerProps> = ({
 
       {isProcessing && (
         <ProcessingIndicator imageType={imageType} />
+      )}
+
+      {rawApiResponse && (
+        <div className="mt-4">
+          <h4 className="font-medium mb-2">Raw API Response (for debugging):</h4>
+          <Textarea
+            readOnly
+            value={rawApiResponse}
+            className="w-full h-48 text-xs"
+            placeholder="Raw API response will appear here..."
+          />
+        </div>
       )}
 
       <div className="flex justify-center mt-4">
