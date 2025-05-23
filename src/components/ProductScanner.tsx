@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea"; // Added import
+// Textarea import removed as it's no longer used
 import { Camera } from "lucide-react";
 import { ProductData } from "@/types/product";
 import { useToast } from "@/components/ui/use-toast";
@@ -12,7 +12,7 @@ import { ProcessingIndicator } from "./scanner/ProcessingIndicator";
 import { processImageWithType } from "@/utils/imageProcessingUtils";
 
 interface ProductScannerProps {
-  onProductsDetected: (products: ProductData[]) => void;
+  onProductsDetected: (products: ProductData[], rawResponse: string) => void;
   onCancel: () => void;
 }
 
@@ -24,7 +24,7 @@ const ProductScanner: React.FC<ProductScannerProps> = ({
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [imageType, setImageType] = useState<string | null>(null);
   const [showCamera, setShowCamera] = useState(false);
-  const [rawApiResponse, setRawApiResponse] = useState<string | null>(null); // Added state
+  // rawApiResponse state removed
   const { toast } = useToast();
 
   const handleCameraCapture = (imageData: string) => {
@@ -47,8 +47,8 @@ const ProductScanner: React.FC<ProductScannerProps> = ({
           title: "Analysis Complete",
           description: `Found ${products.length} products on the shelf!`,
         });
-        onProductsDetected(products);
-        setRawApiResponse(rawResponse); // Added line
+        onProductsDetected(products, rawResponse); // Updated call
+        // setRawApiResponse removed
       },
       () => {
         toast({
@@ -78,8 +78,8 @@ const ProductScanner: React.FC<ProductScannerProps> = ({
           title: "Analysis Complete",
           description: `Found ${products.length} ${detectedType} products!`,
         });
-        onProductsDetected(products);
-        setRawApiResponse(rawResponse); // Added line
+        onProductsDetected(products, rawResponse); // Updated call
+        // setRawApiResponse removed
       },
       () => {
         toast({
@@ -129,17 +129,7 @@ const ProductScanner: React.FC<ProductScannerProps> = ({
         <ProcessingIndicator imageType={imageType} />
       )}
 
-      {rawApiResponse && (
-        <div className="mt-4">
-          <h4 className="font-medium mb-2">Raw API Response (for debugging):</h4>
-          <Textarea
-            readOnly
-            value={rawApiResponse}
-            className="w-full h-48 text-xs"
-            placeholder="Raw API response will appear here..."
-          />
-        </div>
-      )}
+      {/* Raw API Response display removed */}
 
       <div className="flex justify-center mt-4">
         <Button variant="outline" onClick={onCancel} className="mr-2">Cancel</Button>
