@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea"; // Added import
 import ProductScanner from "@/components/ProductScanner";
 import ProductDisplay from "@/components/ProductDisplay";
 import SpreadsheetExport from "@/components/SpreadsheetExport";
@@ -9,9 +10,11 @@ import { ProductData } from "@/types/product";
 const Index = () => {
   const [scannedProducts, setScannedProducts] = useState<ProductData[]>([]);
   const [isScanning, setIsScanning] = useState(false);
+  const [lastRawApiResponse, setLastRawApiResponse] = useState<string | null>(null); // Added state
 
-  const handleProductsDetected = (products: ProductData[]) => {
+  const handleProductsDetected = (products: ProductData[], rawResponse: string) => { // Updated signature
     setScannedProducts((prev) => [...prev, ...products]);
+    setLastRawApiResponse(rawResponse); // Added line
     setIsScanning(false);
   };
 
@@ -54,6 +57,17 @@ const Index = () => {
             <div className="mt-8">
               <SpreadsheetExport products={scannedProducts} />
             </div>
+            {lastRawApiResponse && (
+              <div className="mt-8">
+                <h3 className="text-lg font-semibold mb-2">Raw API Response (for debugging):</h3>
+                <Textarea
+                  readOnly
+                  value={lastRawApiResponse}
+                  className="w-full h-60 text-xs bg-gray-50"
+                  placeholder="Raw API response..."
+                />
+              </div>
+            )}
           </>
         )}
       </div>
