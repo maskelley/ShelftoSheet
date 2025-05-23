@@ -13,22 +13,39 @@ const Index = () => {
   const [lastRawApiResponse, setLastRawApiResponse] = useState<string | null>(null); // Added state
 
   const handleProductsDetected = (products: ProductData[], rawResponse: string) => {
+  let debugMessage = '[[DEFAULT_DEBUG_MESSAGE_NO_RAW_RESPONSE_INFO]]'; // Should not see this if func is called
+  
+  // Explicitly check type and value of rawResponse
+  if (rawResponse === null) {
+    debugMessage = '[[RAW_RESPONSE_WAS_NULL]]';
+  } else if (typeof rawResponse === 'undefined') { // More robust check for undefined
+    debugMessage = '[[RAW_RESPONSE_WAS_UNDEFINED]]';
+  } else if (rawResponse === "") {
+    debugMessage = '[[RAW_RESPONSE_WAS_EMPTY_STRING]]';
+  } else if (typeof rawResponse === 'string') {
+    debugMessage = `RAW_STRING_RECEIVED (len ${rawResponse.length}): ${rawResponse.substring(0, 300)}`;
+  } else {
+    // If rawResponse is some other type (e.g., object, number) by mistake
+    debugMessage = `[[RAW_RESPONSE_UNEXPECTED_TYPE: ${typeof rawResponse}]]`;
+  }
+
   const debugProduct: ProductData = {
-    id: 'debug-' + new Date().getTime(),
-    name: `RAW_RESPONSE_DEBUG: ${rawResponse ? rawResponse.substring(0, 300) : '[[RAW_RESPONSE_WAS_NULL_OR_EMPTY]]'}`,
-    brand: `(Type: ${typeof rawResponse}, Length: ${rawResponse ? rawResponse.length : 0})`,
+    id: 'debug-' + new Date().getTime(), // Unique ID for the debug product
+    name: debugMessage,
+    brand: 'UltraSimple Debug Brand',
     confidence: 1,
-    imageUrl: '', // No image for this debug item
+    imageUrl: '',
     nutrition: {},
     timestamp: new Date().toISOString()
   };
 
-  // Add the debug product first to make it prominent
-  // Keep existing products as well, if any.
-  setScannedProducts((prev) => [debugProduct, ...prev.filter(p => !p.id.startsWith('debug-')), ...products.filter(p => !p.id.startsWith('debug-'))]);
+  // Simplest way to add it: create a new array with debugProduct first, then existing products.
+  // This also ensures no old debug products linger if products array was empty.
+  const newScannedProducts = products ? [debugProduct, ...products.filter(p => p.id !== debugProduct.id)] : [debugProduct];
+  setScannedProducts(newScannedProducts);
   
-  // Ensure lastRawApiResponse is still set, for the other display method (if it ever works)
-  setLastRawApiResponse(rawResponse);
+  // Still set lastRawApiResponse, in case the other display logic might work or for future use.
+  setLastRawApiResponse(rawResponse); 
   setIsScanning(false);
 };
 
