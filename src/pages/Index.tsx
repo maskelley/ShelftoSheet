@@ -12,11 +12,25 @@ const Index = () => {
   const [isScanning, setIsScanning] = useState(false);
   const [lastRawApiResponse, setLastRawApiResponse] = useState<string | null>(null); // Added state
 
-  const handleProductsDetected = (products: ProductData[], rawResponse: string) => { // Updated signature
-    setScannedProducts((prev) => [...prev, ...products]);
-    setLastRawApiResponse(rawResponse); // Added line
-    setIsScanning(false);
+  const handleProductsDetected = (products: ProductData[], rawResponse: string) => {
+  const debugProduct: ProductData = {
+    id: 'debug-' + new Date().getTime(),
+    name: `RAW_RESPONSE_DEBUG: ${rawResponse ? rawResponse.substring(0, 300) : '[[RAW_RESPONSE_WAS_NULL_OR_EMPTY]]'}`,
+    brand: `(Type: ${typeof rawResponse}, Length: ${rawResponse ? rawResponse.length : 0})`,
+    confidence: 1,
+    imageUrl: '', // No image for this debug item
+    nutrition: {},
+    timestamp: new Date().toISOString()
   };
+
+  // Add the debug product first to make it prominent
+  // Keep existing products as well, if any.
+  setScannedProducts((prev) => [debugProduct, ...prev.filter(p => !p.id.startsWith('debug-')), ...products.filter(p => !p.id.startsWith('debug-'))]);
+  
+  // Ensure lastRawApiResponse is still set, for the other display method (if it ever works)
+  setLastRawApiResponse(rawResponse);
+  setIsScanning(false);
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-teal-50">
