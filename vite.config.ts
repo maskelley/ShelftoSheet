@@ -7,7 +7,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd());
   
   return {
-    base: '/shelf-to-spreadsheet-magic/', // Moved inside the return object
+    base: '/ShelftoSheet/', // Added this line
     plugins: [react()],
     resolve: {
       alias: {
