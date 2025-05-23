@@ -57,18 +57,33 @@ const Index = () => {
             <div className="mt-8">
               <SpreadsheetExport products={scannedProducts} />
             </div>
-            {lastRawApiResponse && (
-              <div className="mt-8">
-                <h3 className="text-lg font-semibold mb-2">Raw API Response (for debugging):</h3>
+            {/* The PREVIOUS location of the rawApiResponse textarea was here - it's now removed */}
+          </>
+        )}
+
+        {/* New Diagnostic Display Block - Placed AFTER the scannedProducts display */}
+        {lastRawApiResponse !== null && (
+          <div className="mt-8 p-4 border border-dashed border-gray-400 rounded-md bg-white shadow">
+            <h3 className="text-lg font-semibold mb-2 text-center">API Response Debugging Area</h3>
+            {lastRawApiResponse === "" ? (
+              <p className="text-sm text-orange-600 font-semibold text-center">Status: Raw API Response received (it was an EMPTY STRING).</p>
+            ) : (
+              <>
+                <p className="text-sm text-green-600 font-semibold text-center">Status: Raw API Response received (populated).</p>
+                <p className="text-xs text-gray-700 mt-1 mb-2">
+                  Beginning of response (first 200 chars): 
+                  <code className="block bg-gray-100 p-2 my-1 break-all shadow-inner">{lastRawApiResponse.substring(0, 200)}...</code>
+                </p>
+                <h4 className="text-md font-semibold mb-1 mt-3">Full Raw API Response:</h4>
                 <Textarea
                   readOnly
                   value={lastRawApiResponse}
-                  className="w-full h-60 text-xs bg-gray-50"
-                  placeholder="Raw API response..."
+                  className="w-full h-60 text-xs bg-gray-100 shadow-inner"
+                  placeholder="Raw API response should appear here if populated..."
                 />
-              </div>
+              </>
             )}
-          </>
+          </div>
         )}
       </div>
     </div>
