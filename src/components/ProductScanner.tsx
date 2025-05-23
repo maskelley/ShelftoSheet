@@ -12,7 +12,7 @@ import { ProcessingIndicator } from "./scanner/ProcessingIndicator";
 import { processImageWithType } from "@/utils/imageProcessingUtils";
 
 interface ProductScannerProps {
-  onProductsDetected: (products: ProductData[], rawResponse: string) => void;
+  onProductsDetected: (products: ProductData[]) => void;
   onCancel: () => void;
 }
 
@@ -42,12 +42,12 @@ const ProductScanner: React.FC<ProductScannerProps> = ({
     processImageWithType(
       imageData, 
       null, // passing null lets the system detect the type
-      (products, rawResponse) => { // Updated callback signature
+      (products) => { // Reverted callback signature
         toast({
           title: "Analysis Complete",
           description: `Found ${products.length} products on the shelf!`,
         });
-        onProductsDetected(products, rawResponse); // Updated call
+        onProductsDetected(products); // Reverted call
         // setRawApiResponse removed
       },
       () => {
@@ -73,12 +73,12 @@ const ProductScanner: React.FC<ProductScannerProps> = ({
     processImageWithType(
       imageData, 
       detectedType, 
-      (products, rawResponse) => { // Updated callback signature
+      (products) => { // Reverted callback signature
         toast({
           title: "Analysis Complete",
           description: `Found ${products.length} ${detectedType} products!`,
         });
-        onProductsDetected(products, rawResponse); // Updated call
+        onProductsDetected(products); // Reverted call
         // setRawApiResponse removed
       },
       () => {

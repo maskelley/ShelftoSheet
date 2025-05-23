@@ -21,8 +21,7 @@ const API_BASE_URL = "https://api.openai.com/v1";
 export const processImageWithVision = async (
   imageData: string,
   productType: string
-): Promise<{ detectedProducts: ProductData[]; rawResponse: string }> => {
-  let responseText: string = "";
+): Promise<ProductData[]> => {
   try {
     console.log(`Processing ${productType} image with OpenAI Vision API directly...`);
     
@@ -66,9 +65,9 @@ export const processImageWithVision = async (
     console.log("API response received directly from OpenAI");
     
     // Extract the response content - keep your existing processing code
-    responseText = response.data.choices[0].message.content; // Assign to the initialized responseText
+    const responseText = response.data.choices[0].message.content; // Ensure responseText is const
     console.log("Response text:", responseText.substring(0, 100) + "..."); // Log only part to avoid huge logs
-    console.log("Raw API Response Text:", responseText);
+    // Removed: console.log("Raw API Response Text:", responseText);
     
     // Parse the JSON response with improved extraction
     let products = [];
@@ -95,10 +94,10 @@ export const processImageWithVision = async (
       console.log("Successfully parsed products data");
     } catch (parseError) {
       console.error("Error parsing response:", parseError);
-      console.log("Raw API Response Text:", responseText); // Ensure this uses the correct variable
+      // Removed: console.log("Raw API Response Text:", responseText);
       // Fallback approach
       console.error("Failed to parse JSON response after multiple attempts. Returning empty array.");
-      return { detectedProducts: [], rawResponse: responseText };
+      return [];
     }
 
     // Convert the parsed products to our app's product data format
@@ -113,7 +112,7 @@ export const processImageWithVision = async (
     }));
 
     console.log(`Detected ${detectedProducts.length} products`);
-    return { detectedProducts, rawResponse: responseText };
+    return detectedProducts;
   } catch (error) {
     console.error("Error processing image:", error);
     if (axios.isAxiosError(error)) {

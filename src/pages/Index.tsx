@@ -12,7 +12,7 @@ const Index = () => {
   const [isScanning, setIsScanning] = useState(false);
   // lastRawApiResponse state removed
 
-  const handleProductsDetected = (products: ProductData[], rawResponse: string) => { // rawResponse is accepted but now ignored
+  const handleProductsDetected = (products: ProductData[]) => {
     setScannedProducts((prev) => [...prev, ...products]);
     setIsScanning(false);
   };
