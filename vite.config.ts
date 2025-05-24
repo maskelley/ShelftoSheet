@@ -7,7 +7,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd());
   
   return {
-    base: '/ShelftoSheet/', // Added this line
+    base: '/ShelftoSheet/',
     plugins: [react()],
     resolve: {
       alias: {
