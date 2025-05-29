@@ -44,7 +44,7 @@ export const processImageWithVision = async (
           content: [
             { 
               type: "text", 
-              text: `Identify all distinct ${productType} products in the image. Provide a JSON array where each object represents a product and includes 'name', 'brand', and 'confidence'. For example: [{'name': 'Product A', 'brand': 'Brand X', 'confidence': 0.9}, {'name': 'Product B', 'brand': 'Brand Y', 'confidence': 0.8}]. If no products are found, return an empty array.`
+              text: `List every distinct ${productType} product visible in the image. For each, provide a JSON array object with 'name', 'brand', and 'confidence'. Only return the array, no extra text. Example: [{"name": "Product A", "brand": "Brand X", "confidence": 0.9}, {"name": "Product B", "brand": "Brand Y", "confidence": 0.8}]. If no products are found, return an empty array.`
             },
             { 
               type: "image_url",
