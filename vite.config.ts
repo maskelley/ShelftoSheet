@@ -7,7 +7,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd());
   
   return {
-    base: '/ShelftoSheet/',
+    base: '/ShelftoSheet/', // Set correct base path for GitHub Pages
     plugins: [react()],
     resolve: {
       alias: {
