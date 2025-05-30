@@ -95,7 +95,7 @@ export const processImageWithVision = async (
       const geminiPrompt = `Identify all distinct ${productType} products visible in the image. Return a single JSON array, where each element is an object with 'name', 'brand', and 'confidence' fields. Only return the array, no extra text. Example: [{"name": "Product A", "brand": "Brand X", "confidence": 0.9}, {"name": "Product B", "brand": "Brand Y", "confidence": 0.8}]. If no products are found, return an empty array.`;
 
       const response = await axios.post(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
         {
           contents: [
             {
@@ -247,7 +247,7 @@ export const detectProductType = async (
       const geminiPrompt = "What type of products are shown? Answer with: beverage, dairy, cereal, vegetable, snack, bakery, meat, seafood, or unknown.";
 
       const response = await axios.post(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
         {
           contents: [
             {
