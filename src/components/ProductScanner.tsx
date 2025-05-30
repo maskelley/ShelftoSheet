@@ -26,6 +26,7 @@ const ProductScanner: React.FC<ProductScannerProps> = ({
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [imageType, setImageType] = useState<string | null>(null);
   const [showCamera, setShowCamera] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   // rawApiResponse state removed
   const { toast } = useToast();
 
@@ -33,6 +34,7 @@ const ProductScanner: React.FC<ProductScannerProps> = ({
     setCapturedImage(imageData);
     setShowCamera(false);
     setImageType(null);
+    setErrorMessage(null);
     toast({
       title: "Processing",
       description: `Using ${provider} to analyze the image...`,
@@ -45,14 +47,16 @@ const ProductScanner: React.FC<ProductScannerProps> = ({
           title: "Analysis Complete",
           description: `Found ${products.length} products on the shelf!`,
         });
+        setErrorMessage(null);
         onProductsDetected(products);
       },
-      () => {
+      (error) => {
         toast({
           title: "Processing Error",
           description: "Could not process the image. Please try again.",
           variant: "destructive",
         });
+        setErrorMessage(error instanceof Error ? error.message : String(error));
       },
       setIsProcessing,
       provider // Pass provider to processImageWithType
@@ -62,6 +66,7 @@ const ProductScanner: React.FC<ProductScannerProps> = ({
   const handleFileSelected = (imageData: string, detectedType: string) => {
     setCapturedImage(imageData);
     setImageType(detectedType);
+    setErrorMessage(null);
     toast({
       title: "Processing Product Image",
       description: `Analyzing ${detectedType} products with ${provider} vision...`,
@@ -74,14 +79,16 @@ const ProductScanner: React.FC<ProductScannerProps> = ({
           title: "Analysis Complete",
           description: `Found ${products.length} ${detectedType} products!`,
         });
+        setErrorMessage(null);
         onProductsDetected(products);
       },
-      () => {
+      (error) => {
         toast({
           title: "Processing Error",
           description: "Could not process the image. Please try again.",
           variant: "destructive",
         });
+        setErrorMessage(error instanceof Error ? error.message : String(error));
       },
       setIsProcessing,
       provider // Pass provider to processImageWithType
@@ -125,7 +132,12 @@ const ProductScanner: React.FC<ProductScannerProps> = ({
         <ProcessingIndicator imageType={imageType} />
       )}
 
-      {/* Raw API Response display removed */}
+      {errorMessage && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative text-sm break-words max-w-full overflow-x-auto mt-2" role="alert" style={{ wordBreak: 'break-word' }}>
+          <strong className="font-bold">Error:</strong>
+          <span className="block whitespace-pre-wrap">{errorMessage}</span>
+        </div>
+      )}
 
       <div className="flex justify-center mt-4">
         <Button variant="outline" onClick={onCancel} className="mr-2">

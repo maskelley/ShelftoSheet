@@ -159,12 +159,24 @@ export const processImageWithVision = async (
 
     return detectedProducts;
   } catch (error) {
-    console.error("Error processing image:", error);
+    let errorMessage = "Failed to process image: ";
     if (axios.isAxiosError(error)) {
-      console.error("API response:", error.response?.data);
-      console.error("API status:", error.response?.status);
+      errorMessage += error.message;
+      if (error.response) {
+        errorMessage += ` (status: ${error.response.status})`;
+        if (typeof error.response.data === "string") {
+          errorMessage += `\nResponse: ${error.response.data}`;
+        } else if (error.response.data) {
+          errorMessage += `\nResponse: ${JSON.stringify(error.response.data)}`;
+        }
+      }
+    } else if (error instanceof Error) {
+      errorMessage += error.message;
+    } else {
+      errorMessage += "Unknown error";
     }
-    throw new Error(`Failed to process image: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    console.error(errorMessage);
+    throw new Error(errorMessage);
   }
 };
 
