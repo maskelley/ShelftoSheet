@@ -284,11 +284,27 @@ export const detectProductType = async (
 
     return productType;
   } catch (error) {
-    console.error("Error detecting product type:", error);
+    let errorMessage = "Failed to detect product type: ";
     if (axios.isAxiosError(error)) {
-      console.error("API response:", error.response?.data);
-      console.error("API status:", error.response?.status);
+      errorMessage += error.message;
+      if (error.response) {
+        errorMessage += ` (status: ${error.response.status})`;
+        if (typeof error.response.data === "string") {
+          errorMessage += `\nResponse: ${error.response.data}`;
+        } else if (error.response.data) {
+          try {
+            errorMessage += `\nResponse: ${JSON.stringify(error.response.data)}`;
+          } catch {
+            errorMessage += `\nResponse: [unserializable data]`;
+          }
+        }
+      }
+    } else if (error instanceof Error) {
+      errorMessage += error.message;
+    } else {
+      errorMessage += String(error);
     }
-    return "unknown";
+    console.error(errorMessage);
+    throw new Error(errorMessage);
   }
 };
