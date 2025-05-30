@@ -167,13 +167,17 @@ export const processImageWithVision = async (
         if (typeof error.response.data === "string") {
           errorMessage += `\nResponse: ${error.response.data}`;
         } else if (error.response.data) {
-          errorMessage += `\nResponse: ${JSON.stringify(error.response.data)}`;
+          try {
+            errorMessage += `\nResponse: ${JSON.stringify(error.response.data)}`;
+          } catch {
+            errorMessage += `\nResponse: [unserializable data]`;
+          }
         }
       }
     } else if (error instanceof Error) {
       errorMessage += error.message;
     } else {
-      errorMessage += "Unknown error";
+      errorMessage += String(error);
     }
     console.error(errorMessage);
     throw new Error(errorMessage);
