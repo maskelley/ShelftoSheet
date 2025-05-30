@@ -23,28 +23,26 @@ export const processImageWithType = async (
   type: string | null, 
   onSuccess: (products: ProductData[]) => void,
   onError: () => void,
-  setIsProcessing: (state: boolean) => void
+  setIsProcessing: (state: boolean) => void,
+  provider: "openai" | "gemini" // <-- add provider param
 ): Promise<void> => {
-  console.log("Starting processImageWithType...");
+  console.log("Starting processImageWithType with provider:", provider);
   setIsProcessing(true);
 
   try {
     // If no type is provided, detect it first
-    const productType = type || await detectProductType(imageData);
+    const productType = type || await detectProductType(imageData, provider);
     console.log(`Detected product type: ${productType}`);
-    
     // Attempt to process with AI vision from aiVisionUtils
-    console.log("Calling processImageWithVision...");
-    const products = await processImageWithVision(imageData, productType); // Reverted variable name
+    console.log("Calling processImageWithVision with provider:", provider);
+    const products = await processImageWithVision(imageData, productType, provider);
     console.log("Products detected by AI vision:", products);
-    // Removed: console.log("Raw API response captured in imageProcessingUtils:", rawResponse.substring(0,100));
-
-    if (products && products.length > 0) { // Reverted variable name
+    if (products && products.length > 0) {
       console.log("Products successfully detected. Calling onSuccess...");
-      onSuccess(products); // Reverted call
+      onSuccess(products);
     } else {
-      console.warn("No products detected by AI vision."); // Reverted log
-      onError(); // Reverted call
+      console.warn("No products detected by AI vision.");
+      onError();
     }
   } catch (error) {
     console.error("Error in processImageWithType:", error);

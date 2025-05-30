@@ -14,11 +14,13 @@ import { processImageWithType } from "@/utils/imageProcessingUtils";
 interface ProductScannerProps {
   onProductsDetected: (products: ProductData[]) => void;
   onCancel: () => void;
+  provider: "openai" | "gemini";
 }
 
 const ProductScanner: React.FC<ProductScannerProps> = ({
   onProductsDetected,
   onCancel,
+  provider,
 }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
@@ -30,25 +32,20 @@ const ProductScanner: React.FC<ProductScannerProps> = ({
   const handleCameraCapture = (imageData: string) => {
     setCapturedImage(imageData);
     setShowCamera(false);
-    
-    // For camera captures, let the system detect the product type
     setImageType(null);
     toast({
       title: "Processing",
-      description: "Using GPT-4o to analyze the image...",
+      description: `Using ${provider} to analyze the image...`,
     });
-    
-    // Process the image with AI detection
     processImageWithType(
-      imageData, 
-      null, // passing null lets the system detect the type
-      (products) => { // Reverted callback signature
+      imageData,
+      null,
+      (products) => {
         toast({
           title: "Analysis Complete",
           description: `Found ${products.length} products on the shelf!`,
         });
-        onProductsDetected(products); // Reverted call
-        // setRawApiResponse removed
+        onProductsDetected(products);
       },
       () => {
         toast({
@@ -57,29 +54,27 @@ const ProductScanner: React.FC<ProductScannerProps> = ({
           variant: "destructive",
         });
       },
-      setIsProcessing
+      setIsProcessing,
+      provider // Pass provider to processImageWithType
     );
   };
 
   const handleFileSelected = (imageData: string, detectedType: string) => {
     setCapturedImage(imageData);
     setImageType(detectedType);
-    
     toast({
       title: "Processing Product Image",
-      description: `Analyzing ${detectedType} products with GPT-4o vision...`,
+      description: `Analyzing ${detectedType} products with ${provider} vision...`,
     });
-    
     processImageWithType(
-      imageData, 
-      detectedType, 
-      (products) => { // Reverted callback signature
+      imageData,
+      detectedType,
+      (products) => {
         toast({
           title: "Analysis Complete",
           description: `Found ${products.length} ${detectedType} products!`,
         });
-        onProductsDetected(products); // Reverted call
-        // setRawApiResponse removed
+        onProductsDetected(products);
       },
       () => {
         toast({
@@ -88,7 +83,8 @@ const ProductScanner: React.FC<ProductScannerProps> = ({
           variant: "destructive",
         });
       },
-      setIsProcessing
+      setIsProcessing,
+      provider // Pass provider to processImageWithType
     );
   };
 
@@ -100,15 +96,15 @@ const ProductScanner: React.FC<ProductScannerProps> = ({
     <div className="space-y-4">
       {!capturedImage && !isProcessing && !showCamera && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card 
-            className="p-4 flex flex-col items-center justify-center cursor-pointer hover:bg-blue-50 transition-colors" 
+          <Card
+            className="p-4 flex flex-col items-center justify-center cursor-pointer hover:bg-blue-50 transition-colors"
             onClick={handleStartCamera}
           >
             <Camera className="h-12 w-12 text-blue-600 mb-2" />
             <h3 className="font-medium">Take Photo</h3>
             <p className="text-sm text-gray-500">Use your camera to scan shelves</p>
           </Card>
-          
+
           <FileUpload onImageSelected={handleFileSelected} />
         </div>
       )}
@@ -118,10 +114,10 @@ const ProductScanner: React.FC<ProductScannerProps> = ({
       )}
 
       {capturedImage && (
-        <ImagePreview 
-          imageUrl={capturedImage} 
-          imageType={imageType} 
-          isProcessing={isProcessing} 
+        <ImagePreview
+          imageUrl={capturedImage}
+          imageType={imageType}
+          isProcessing={isProcessing}
         />
       )}
 
@@ -132,7 +128,9 @@ const ProductScanner: React.FC<ProductScannerProps> = ({
       {/* Raw API Response display removed */}
 
       <div className="flex justify-center mt-4">
-        <Button variant="outline" onClick={onCancel} className="mr-2">Cancel</Button>
+        <Button variant="outline" onClick={onCancel} className="mr-2">
+          Cancel
+        </Button>
       </div>
     </div>
   );
