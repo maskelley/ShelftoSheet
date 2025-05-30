@@ -22,7 +22,7 @@ export const processImageWithType = async (
   imageData: string, 
   type: string | null, 
   onSuccess: (products: ProductData[]) => void,
-  onError: () => void,
+  onError: (error: Error) => void,
   setIsProcessing: (state: boolean) => void,
   provider: "openai" | "gemini" // <-- add provider param
 ): Promise<void> => {
@@ -42,11 +42,11 @@ export const processImageWithType = async (
       onSuccess(products);
     } else {
       console.warn("No products detected by AI vision.");
-      onError();
+      onError(new Error("No products detected by AI vision."));
     }
   } catch (error) {
     console.error("Error in processImageWithType:", error);
-    onError();
+    onError(error);
   } finally {
     console.log("Setting isProcessing to false...");
     setIsProcessing(false);
