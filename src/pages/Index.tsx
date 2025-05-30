@@ -1,16 +1,19 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-// Textarea import removed
 import ProductScanner from "@/components/ProductScanner";
 import ProductDisplay from "@/components/ProductDisplay";
 import SpreadsheetExport from "@/components/SpreadsheetExport";
 import { ProductData } from "@/types/product";
 
-const Index = () => {
+// Accept provider as a prop
+interface IndexProps {
+  provider: "openai" | "gemini";
+}
+
+const Index = ({ provider }: IndexProps) => {
   const [scannedProducts, setScannedProducts] = useState<ProductData[]>([]);
   const [isScanning, setIsScanning] = useState(false);
-  // lastRawApiResponse state removed
 
   const handleProductsDetected = (products: ProductData[]) => {
     setScannedProducts((prev) => [...prev, ...products]);
@@ -44,6 +47,7 @@ const Index = () => {
             </div>
           ) : (
             <ProductScanner 
+              provider={provider} // Pass provider down!
               onProductsDetected={handleProductsDetected}
               onCancel={() => setIsScanning(false)}
             />
@@ -56,11 +60,8 @@ const Index = () => {
             <div className="mt-8">
               <SpreadsheetExport products={scannedProducts} />
             </div>
-            {/* The PREVIOUS location of the rawApiResponse textarea was here - it's now removed */}
           </>
         )}
-
-        {/* Diagnostic Display Block REMOVED */}
       </div>
     </div>
   );
