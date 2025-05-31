@@ -3,13 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 // Textarea import removed as it's no longer used
 import { Camera } from "lucide-react";
-import { ProductData } from "@/types/product";
+import { ProductData } from "@/types/products";
 import { useToast } from "@/components/ui/use-toast";
 import { CameraCapture } from "./scanner/CameraCapture";
 import { FileUpload } from "./scanner/FileUpload";
 import { ImagePreview } from "./scanner/ImagePreview";
 import { ProcessingIndicator } from "./scanner/ProcessingIndicator";
 import { processImageWithType } from "@/utils/imageProcessingUtils";
+import { fetchNutritionInfo } from "@/utils/nutritionUtils";
 
 interface ProductScannerProps {
   onProductsDetected: (products: ProductData[]) => void;
@@ -30,6 +31,45 @@ const ProductScanner: React.FC<ProductScannerProps> = ({
   // rawApiResponse state removed
   const { toast } = useToast();
 
+  const handleProductsDetectedWithNutrition = async (products: ProductData[]) => {
+    setIsProcessing(true);
+    setErrorMessage(null);
+    try {
+      // Fetch nutrition info for each product in parallel
+      const enrichedProducts = await Promise.all(
+        products.map(async (product) => {
+          try {
+            const nutrition = await fetchNutritionInfo(product.name, product.brand);
+            // Map Open Food Facts fields to app's NutritionInfo shape, fallback to empty/defaults
+            return {
+              ...product,
+              nutrition: nutrition
+                ? {
+                    calories: nutrition.calories ?? 0,
+                    protein: nutrition.protein ?? 0,
+                    carbs: nutrition.carbohydrates ?? 0,
+                    fat: nutrition.fat ?? 0,
+                    servingSize: nutrition.servingSize ?? "",
+                  }
+                : { calories: 0, protein: 0, carbs: 0, fat: 0, servingSize: "" },
+            };
+          } catch (err) {
+            // If nutrition fetch fails, fallback to empty/defaults
+            return {
+              ...product,
+              nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0, servingSize: "" },
+            };
+          }
+        })
+      );
+      onProductsDetected(enrichedProducts);
+    } catch (err) {
+      setErrorMessage("Failed to enrich products with nutrition info.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const handleCameraCapture = (imageData: string) => {
     setCapturedImage(imageData);
     setShowCamera(false);
@@ -48,7 +88,7 @@ const ProductScanner: React.FC<ProductScannerProps> = ({
           description: `Found ${products.length} products on the shelf!`,
         });
         setErrorMessage(null);
-        onProductsDetected(products);
+        handleProductsDetectedWithNutrition(products);
       },
       (error) => {
         toast({
@@ -80,7 +120,7 @@ const ProductScanner: React.FC<ProductScannerProps> = ({
           description: `Found ${products.length} ${detectedType} products!`,
         });
         setErrorMessage(null);
-        onProductsDetected(products);
+        handleProductsDetectedWithNutrition(products);
       },
       (error) => {
         toast({

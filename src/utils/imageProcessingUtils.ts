@@ -1,19 +1,9 @@
 import { v4 as uuidv4 } from "uuid"; // Correct import for UUID
-import { processImageWithVision, detectProductType } from "./aiVisionUtils"; // Import from aiVisionUtils
+import { NutritionInfo, ProductData } from "@/types/products";
+import { processImageWithVision, detectProductType } from "./aiVisionUtils";
 
 // Re-export detectProductType so other components can import it from here
 export { detectProductType };
-
-// Define the ProductData interface to match what's used in aiVisionUtils
-export interface ProductData {
-  id: string;
-  name: string;
-  brand: string;
-  confidence: number;
-  imageUrl: string;
-  nutrition: Record<string, any>;
-  timestamp: string;
-}
 
 /**
  * Process an image with the specified product type or detect the type automatically
@@ -99,12 +89,12 @@ export const generateMockProducts = (productType: string): ProductData[] => {
   const productsForType = mockProducts[productType] || mockProducts.unknown;
   
   return productsForType.map(product => ({
-    id: uuidv4(), // Correctly using uuidv4 instead of uuid4
+    id: uuidv4(),
     name: product.name,
     brand: product.brand,
     confidence: 0.95,
     imageUrl: "https://example.com/placeholder.jpg",
-    nutrition: {},
+    nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0, servingSize: "" },
     timestamp: new Date().toISOString()
   }));
 };

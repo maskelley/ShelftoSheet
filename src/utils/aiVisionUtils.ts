@@ -1,16 +1,6 @@
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
-
-// ProductData type definition
-interface ProductData {
-  id: string;
-  name: string;
-  brand: string;
-  confidence: number;
-  imageUrl: string;
-  nutrition: Record<string, any>;
-  timestamp: string;
-}
+import { ProductData } from "@/types/products";
 
 type Provider = "openai" | "gemini";
 
@@ -153,7 +143,7 @@ export const processImageWithVision = async (
       brand: product.brand || "Unknown brand",
       confidence: product.confidence || 0.8,
       imageUrl: imageData,
-      nutrition: {},
+      nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0, servingSize: "" },
       timestamp: new Date().toISOString(),
     }));
 
