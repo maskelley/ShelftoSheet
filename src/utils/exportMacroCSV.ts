@@ -2,16 +2,24 @@
 // Script to export only brand, product, carbohydrate, protein, and fat columns from scanned products to a CSV file
 import { ProductData } from "@/types/products";
 
+// Helper function to properly escape CSV values
+function escapeCSVValue(value: string): string {
+  if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+    return `"${value.replace(/"/g, '""')}"`;
+  }
+  return value;
+}
+
 export function exportMacroCSV(products: ProductData[], fileName: string = "macro_export") {
   const headers = ["Brand", "Product Name", "Carbohydrates (g)", "Protein (g)", "Fat (g)", "Claims", "Category"];
   const rows = products.map(product => [
-    product.brand,
-    product.name,
+    escapeCSVValue(product.brand),
+    escapeCSVValue(product.name),
     product.nutrition.carbs.toString(),
     product.nutrition.protein.toString(),
     product.nutrition.fat.toString(),
-    (product.claims || []).join("; "), // Join claims with semicolon separator
-    product.category
+    escapeCSVValue((product.claims || []).join("; ")), // Join claims with semicolon separator
+    escapeCSVValue(product.category)
   ]);
   const csvContent = [
     headers.join(","),

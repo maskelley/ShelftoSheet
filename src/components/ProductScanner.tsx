@@ -88,6 +88,7 @@ const ProductScanner: React.FC<ProductScannerProps> = ({
       imageData,
       null,
       (products) => {
+        console.log("Single image claims detected:", products.map(p => ({ name: p.name, claims: p.claims })));
         toast({
           title: "Analysis Complete",
           description: `Found ${products.length} products on the shelf!`,
@@ -120,6 +121,7 @@ const ProductScanner: React.FC<ProductScannerProps> = ({
       imageData,
       detectedType,
       (products) => {
+        console.log("Single image claims detected:", products.map(p => ({ name: p.name, claims: p.claims })));
         toast({
           title: "Analysis Complete",
           description: `Found ${products.length} ${detectedType} products!`,

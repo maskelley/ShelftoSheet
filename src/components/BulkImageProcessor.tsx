@@ -72,7 +72,10 @@ const BulkImageProcessor: React.FC<BulkImageProcessorProps> = ({ provider }) => 
           processImageWithType(
             base64,
             null, // Let AI detect product type
-            (products) => resolve(products),
+            (products) => {
+              console.log(`Claims detected for ${file.name}:`, products.map(p => ({ name: p.name, claims: p.claims })));
+              resolve(products);
+            },
             (error) => reject(error),
             () => {}, // setIsProcessing - we'll handle this ourselves
             provider

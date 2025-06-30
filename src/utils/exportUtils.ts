@@ -1,5 +1,13 @@
 import { ProductData } from "@/types/products";
 
+// Helper function to properly escape CSV values
+function escapeCSVValue(value: string): string {
+  if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+    return `"${value.replace(/"/g, '""')}"`;
+  }
+  return value;
+}
+
 export const exportToCSV = (products: ProductData[], fileName: string) => {
   // Create header row
   const headers = [
@@ -13,13 +21,15 @@ export const exportToCSV = (products: ProductData[], fileName: string) => {
     'Sodium (mg)',
     'Fiber (g)',
     'Serving Size',
+    'Claims',
+    'Category',
     'Scan Date'
   ];
 
   // Create data rows
   const rows = products.map(product => [
-    product.name,
-    product.brand,
+    escapeCSVValue(product.name),
+    escapeCSVValue(product.brand),
     product.nutrition.calories.toString(),
     product.nutrition.protein.toString(),
     product.nutrition.carbs.toString(),
@@ -27,7 +37,9 @@ export const exportToCSV = (products: ProductData[], fileName: string) => {
     product.nutrition.sugar?.toString() || '',
     product.nutrition.sodium?.toString() || '',
     product.nutrition.fiber?.toString() || '',
-    product.nutrition.servingSize,
+    escapeCSVValue(product.nutrition.servingSize),
+    escapeCSVValue((product.claims || []).join("; ")), // Join claims with semicolon separator
+    escapeCSVValue(product.category),
     product.timestamp
   ]);
 
