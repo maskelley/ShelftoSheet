@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { ProductData } from "@/types/products";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import NutritionCard from "@/components/NutritionCard";
 import { Button } from "@/components/ui/button";
 
@@ -15,6 +16,18 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ products }) => {
   );
 
   const selectedProduct = products.find(p => p.id === selectedProductId);
+
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case "Protein": return "bg-red-100 text-red-800";
+      case "Cognition": return "bg-purple-100 text-purple-800";
+      case "Hydration": return "bg-blue-100 text-blue-800";
+      case "Prebiotic": return "bg-green-100 text-green-800";
+      case "Gluten Free": return "bg-yellow-100 text-yellow-800";
+      case "Non-GMO": return "bg-orange-100 text-orange-800";
+      default: return "bg-gray-100 text-gray-800";
+    }
+  };
 
   return (
     <div>
@@ -49,9 +62,32 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ products }) => {
                     </div>
                   )}
                 </div>
-                <CardContent className="p-3">
+                <CardContent className="p-3 space-y-2">
                   <p className="font-medium truncate">{product.name}</p>
                   <p className="text-sm text-gray-500 truncate">{product.brand}</p>
+                  
+                  {/* Category Badge */}
+                  <div className="flex items-center gap-1">
+                    <Badge className={`text-xs ${getCategoryColor(product.category || "No Category")}`}>
+                      {product.category || "No Category"}
+                    </Badge>
+                  </div>
+                  
+                  {/* Claims */}
+                  {product.claims && product.claims.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {product.claims.slice(0, 2).map((claim, index) => (
+                        <Badge key={index} variant="outline" className="text-xs">
+                          {claim}
+                        </Badge>
+                      ))}
+                      {product.claims.length > 2 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{product.claims.length - 2}
+                        </Badge>
+                      )}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             ))}
@@ -82,15 +118,32 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ products }) => {
                       </div>
                     )}
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <p className="font-medium">{product.name}</p>
                     <p className="text-sm text-gray-500">{product.brand}</p>
                     <p className="text-sm text-gray-400">{product.nutrition.calories} cal</p>
+                    
+                    {/* Category Badge */}
+                    <div className="mt-1">
+                      <Badge className={`text-xs ${getCategoryColor(product.category || "No Category")}`}>
+                        {product.category || "No Category"}
+                      </Badge>
+                    </div>
+                    
+                    {/* Claims */}
                     {product.claims && product.claims.length > 0 && (
-                      <p className="text-xs text-green-600 mt-1">
-                        {product.claims.slice(0, 2).join(", ")}
-                        {product.claims.length > 2 && "..."}
-                      </p>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {product.claims.slice(0, 3).map((claim, index) => (
+                          <Badge key={index} variant="outline" className="text-xs">
+                            {claim}
+                          </Badge>
+                        ))}
+                        {product.claims.length > 3 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{product.claims.length - 3}
+                          </Badge>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>

@@ -11,6 +11,7 @@ import { ImagePreview } from "./scanner/ImagePreview";
 import { ProcessingIndicator } from "./scanner/ProcessingIndicator";
 import { processImageWithType } from "@/utils/imageProcessingUtils";
 import { fetchNutritionInfo } from "@/utils/nutritionUtils";
+import { detectProductCategory } from "@/utils/categoryUtils";
 
 interface ProductScannerProps {
   onProductsDetected: (products: ProductData[]) => void;
@@ -40,9 +41,12 @@ const ProductScanner: React.FC<ProductScannerProps> = ({
         products.map(async (product) => {
           try {
             const nutrition = await fetchNutritionInfo(product.name, product.brand);
-            // Map Open Food Facts fields to app's NutritionInfo shape, fallback to empty/defaults
+            // Re-detect category with enriched data (in case nutrition info helps)
+            const category = detectProductCategory(product.name, product.brand, product.claims || []);
+            
             return {
               ...product,
+              category,
               nutrition: nutrition
                 ? {
                     calories: nutrition.calories ?? 0,
@@ -57,6 +61,7 @@ const ProductScanner: React.FC<ProductScannerProps> = ({
             // If nutrition fetch fails, fallback to empty/defaults
             return {
               ...product,
+              category: detectProductCategory(product.name, product.brand, product.claims || []),
               nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0, servingSize: "" },
             };
           }

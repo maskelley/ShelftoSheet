@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from "uuid"; // Correct import for UUID
 import { NutritionInfo, ProductData } from "@/types/products";
 import { processImageWithVision, detectProductType } from "./aiVisionUtils";
+import { detectProductCategory } from "./categoryUtils";
 
 // Re-export detectProductType so other components can import it from here
 export { detectProductType };
@@ -69,33 +70,67 @@ export const generateMockProducts = (productType: string): ProductData[] => {
   
   const mockProducts: Record<string, any[]> = {
     beverage: [
-      { name: "Coca-Cola", brand: "Coca-Cola Company" },
-      { name: "Pepsi", brand: "PepsiCo" }
+      { 
+        name: "Core Hydration Water", 
+        brand: "Core Hydration",
+        claims: ["Perfect pH", "Electrolyte Enhanced", "Gluten Free"]
+      },
+      { 
+        name: "Protein Shake", 
+        brand: "Premier Protein",
+        claims: ["High Protein", "30g Protein", "Gluten Free"]
+      }
     ],
     snack: [
-      { name: "Lay's Classic", brand: "Frito-Lay" },
-      { name: "Doritos Nacho Cheese", brand: "Frito-Lay" }
+      { 
+        name: "Protein Bar", 
+        brand: "Quest Nutrition",
+        claims: ["High Protein", "Gluten Free", "20g Protein"]
+      },
+      { 
+        name: "Organic Chips", 
+        brand: "Simply Organic",
+        claims: ["Non-GMO", "Gluten Free", "Organic"]
+      }
     ],
     dairy: [
-      { name: "Whole Milk", brand: "Horizon Organic" },
-      { name: "Greek Yogurt", brand: "Chobani" }
+      { 
+        name: "Greek Yogurt", 
+        brand: "Chobani",
+        claims: ["High Protein", "Probiotic", "Non-GMO"]
+      },
+      { 
+        name: "Organic Milk", 
+        brand: "Horizon Organic",
+        claims: ["Organic", "Non-GMO", "Grass Fed"]
+      }
     ],
     // Add more product types as needed
     unknown: [
-      { name: "Unknown Product", brand: "Generic Brand" }
+      { 
+        name: "Unknown Product", 
+        brand: "Generic Brand",
+        claims: []
+      }
     ]
   };
   
   const productsForType = mockProducts[productType] || mockProducts.unknown;
   
-  return productsForType.map(product => ({
-    id: uuidv4(),
-    name: product.name,
-    brand: product.brand,
-    confidence: 0.95,
-    imageUrl: "https://example.com/placeholder.jpg",
-    claims: [],
-    nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0, servingSize: "" },
-    timestamp: new Date().toISOString()
-  }));
+  return productsForType.map(product => {
+    const claims = product.claims || [];
+    const category = detectProductCategory(product.name, product.brand, claims);
+    
+    return {
+      id: uuidv4(),
+      name: product.name,
+      brand: product.brand,
+      confidence: 0.95,
+      imageUrl: "https://example.com/placeholder.jpg",
+      claims,
+      category,
+      nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0, servingSize: "" },
+      timestamp: new Date().toISOString()
+    };
+  });
 };

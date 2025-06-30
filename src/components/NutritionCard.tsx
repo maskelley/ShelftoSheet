@@ -3,6 +3,7 @@ import { ProductData } from "@/types/products";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 
 interface NutritionCardProps {
   product: ProductData;
@@ -16,13 +17,44 @@ const NutritionCard: React.FC<NutritionCardProps> = ({ product }) => {
     return totalMacros > 0 ? Math.round((value / totalMacros) * 100) : 0;
   };
 
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case "Protein": return "bg-red-100 text-red-800";
+      case "Cognition": return "bg-purple-100 text-purple-800";
+      case "Hydration": return "bg-blue-100 text-blue-800";
+      case "Prebiotic": return "bg-green-100 text-green-800";
+      case "Gluten Free": return "bg-yellow-100 text-yellow-800";
+      case "Non-GMO": return "bg-orange-100 text-orange-800";
+      default: return "bg-gray-100 text-gray-800";
+    }
+  };
+
   return (
     <Card>
       <CardHeader className="bg-blue-50">
         <div className="flex justify-between items-start">
-          <div>
+          <div className="flex-1">
             <CardTitle>{product.name}</CardTitle>
             <p className="text-sm text-gray-500">{product.brand}</p>
+            
+            {/* Category and Claims */}
+            <div className="mt-2 space-y-2">
+              <div>
+                <Badge className={`text-xs ${getCategoryColor(product.category || "No Category")}`}>
+                  {product.category || "No Category"}
+                </Badge>
+              </div>
+              
+              {product.claims && product.claims.length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                  {product.claims.map((claim, index) => (
+                    <Badge key={index} variant="outline" className="text-xs">
+                      {claim}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
           <div className="text-right">
             <p className="text-2xl font-bold">{nutrition.calories}</p>

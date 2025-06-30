@@ -5,6 +5,7 @@ export interface ProductData {
   imageUrl?: string;
   confidence: number;
   claims?: string[];
+  category: "Protein" | "Cognition" | "Hydration" | "Prebiotic" | "Gluten Free" | "Non-GMO" | "No Category";
   nutrition: NutritionInfo;
   timestamp: string;
 }

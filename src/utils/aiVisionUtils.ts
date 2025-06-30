@@ -1,6 +1,7 @@
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
 import { ProductData } from "@/types/products";
+import { detectProductCategory } from "@/utils/categoryUtils";
 
 type Provider = "openai" | "gemini";
 
@@ -137,16 +138,23 @@ export const processImageWithVision = async (
     }
 
     // Convert the parsed products to our app's product data format
-    const detectedProducts = products.map((product: any) => ({
-      id: uuidv4(),
-      name: product.name || product.product || "Unknown product",
-      brand: product.brand || "Unknown brand",
-      confidence: product.confidence || 0.8,
-      imageUrl: imageData,
-      claims: product.claims || [],
-      nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0, servingSize: "" },
-      timestamp: new Date().toISOString(),
-    }));
+    const detectedProducts = products.map((product: any) => {
+      const claims = product.claims || [];
+      const productName = product.name || product.product || "Unknown product";
+      const productBrand = product.brand || "Unknown brand";
+      
+      return {
+        id: uuidv4(),
+        name: productName,
+        brand: productBrand,
+        confidence: product.confidence || 0.8,
+        imageUrl: imageData,
+        claims: claims,
+        category: detectProductCategory(productName, productBrand, claims),
+        nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0, servingSize: "" },
+        timestamp: new Date().toISOString(),
+      };
+    });
 
     return detectedProducts;
   } catch (error) {

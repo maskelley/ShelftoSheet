@@ -6,6 +6,7 @@ import { ProductData } from "@/types/products";
 import { processImageWithType } from "@/utils/imageProcessingUtils";
 import { exportMacroCSV } from "@/utils/exportMacroCSV";
 import { fetchNutritionInfo } from "@/utils/nutritionUtils";
+import { detectProductCategory } from "@/utils/categoryUtils";
 import { FolderOpen, Download } from "lucide-react";
 
 interface BulkImageProcessorProps {
@@ -91,8 +92,12 @@ const BulkImageProcessor: React.FC<BulkImageProcessorProps> = ({ provider }) => 
               const nutrition = await fetchNutritionInfo(product.name, product.brand);
               console.log(`Nutrition result for ${product.name}:`, nutrition);
               
+              // Re-detect category with all available data
+              const category = detectProductCategory(product.name, product.brand, product.claims || []);
+              
               return {
                 ...product,
+                category,
                 nutrition: nutrition
                   ? {
                       calories: nutrition.calories ?? 0,
@@ -105,7 +110,10 @@ const BulkImageProcessor: React.FC<BulkImageProcessorProps> = ({ provider }) => 
               };
             } catch (nutritionError) {
               console.error(`Failed to fetch nutrition for ${product.name}:`, nutritionError);
-              return product; // Keep original product with default nutrition
+              return {
+                ...product,
+                category: detectProductCategory(product.name, product.brand, product.claims || [])
+              };
             }
           })
         );
@@ -204,13 +212,10 @@ const BulkImageProcessor: React.FC<BulkImageProcessorProps> = ({ provider }) => 
                 
                 {/* Debug info showing nutrition data */}
                 <div className="mt-2 p-2 bg-blue-50 rounded text-sm">
-                  <p className="font-medium text-blue-800">Sample nutrition data:</p>
+                  <p className="font-medium text-blue-800">Sample product data:</p>
                   {allProducts.slice(0, 3).map((product, idx) => (
                     <div key={idx} className="text-blue-700">
-                      {product.name}: Carbs: {product.nutrition.carbs}g, Protein: {product.nutrition.protein}g, Fat: {product.nutrition.fat}g
-                      {product.claims && product.claims.length > 0 && (
-                        <div className="text-green-700 text-xs">Claims: {product.claims.join(", ")}</div>
-                      )}
+                      {product.name} ({product.category}): Carbs: {product.nutrition.carbs}g, Protein: {product.nutrition.protein}g, Fat: {product.nutrition.fat}g
                     </div>
                   ))}
                 </div>

@@ -3,14 +3,15 @@
 import { ProductData } from "@/types/products";
 
 export function exportMacroCSV(products: ProductData[], fileName: string = "macro_export") {
-  const headers = ["Brand", "Product Name", "Carbohydrates (g)", "Protein (g)", "Fat (g)", "Claims"];
+  const headers = ["Brand", "Product Name", "Carbohydrates (g)", "Protein (g)", "Fat (g)", "Claims", "Category"];
   const rows = products.map(product => [
     product.brand,
     product.name,
     product.nutrition.carbs.toString(),
     product.nutrition.protein.toString(),
     product.nutrition.fat.toString(),
-    (product.claims || []).join("; ") // Join claims with semicolon separator
+    (product.claims || []).join("; "), // Join claims with semicolon separator
+    product.category
   ]);
   const csvContent = [
     headers.join(","),
