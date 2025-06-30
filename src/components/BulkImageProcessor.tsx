@@ -151,7 +151,8 @@ const BulkImageProcessor: React.FC<BulkImageProcessorProps> = ({ provider }) => 
     console.log("Exporting products:", allProducts.map(p => ({
       name: p.name,
       brand: p.brand,
-      nutrition: p.nutrition
+      nutrition: p.nutrition,
+      claims: p.claims
     })));
     
     // Create unique filename with timestamp
@@ -207,6 +208,9 @@ const BulkImageProcessor: React.FC<BulkImageProcessorProps> = ({ provider }) => 
                   {allProducts.slice(0, 3).map((product, idx) => (
                     <div key={idx} className="text-blue-700">
                       {product.name}: Carbs: {product.nutrition.carbs}g, Protein: {product.nutrition.protein}g, Fat: {product.nutrition.fat}g
+                      {product.claims && product.claims.length > 0 && (
+                        <div className="text-green-700 text-xs">Claims: {product.claims.join(", ")}</div>
+                      )}
                     </div>
                   ))}
                 </div>

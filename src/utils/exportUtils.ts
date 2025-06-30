@@ -1,4 +1,4 @@
-import { ProductData } from "@/types/product";
+import { ProductData } from "@/types/products";
 
 export const exportToCSV = (products: ProductData[], fileName: string) => {
   // Create header row

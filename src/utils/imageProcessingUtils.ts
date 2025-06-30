@@ -94,6 +94,7 @@ export const generateMockProducts = (productType: string): ProductData[] => {
     brand: product.brand,
     confidence: 0.95,
     imageUrl: "https://example.com/placeholder.jpg",
+    claims: [],
     nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0, servingSize: "" },
     timestamp: new Date().toISOString()
   }));

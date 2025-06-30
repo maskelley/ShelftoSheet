@@ -4,6 +4,7 @@ export interface ProductData {
   brand: string;
   imageUrl?: string;
   confidence: number;
+  claims?: string[];
   nutrition: NutritionInfo;
   timestamp: string;
 }

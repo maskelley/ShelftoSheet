@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ProductData } from "@/types/product";
+import { ProductData } from "@/types/products";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import NutritionCard from "@/components/NutritionCard";
@@ -86,6 +86,12 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ products }) => {
                     <p className="font-medium">{product.name}</p>
                     <p className="text-sm text-gray-500">{product.brand}</p>
                     <p className="text-sm text-gray-400">{product.nutrition.calories} cal</p>
+                    {product.claims && product.claims.length > 0 && (
+                      <p className="text-xs text-green-600 mt-1">
+                        {product.claims.slice(0, 2).join(", ")}
+                        {product.claims.length > 2 && "..."}
+                      </p>
+                    )}
                   </div>
                 </div>
               </Card>

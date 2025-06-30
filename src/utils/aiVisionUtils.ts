@@ -36,7 +36,7 @@ export const processImageWithVision = async (
               content: [
                 {
                   type: "text",
-                  text: `Identify all distinct ${productType} products visible in the image. Return a single JSON array, where each element is an object with 'name', 'brand', and 'confidence' fields. Only return the array, no extra text. Example: [{"name": "Product A", "brand": "Brand X", "confidence": 0.9}, {"name": "Product B", "brand": "Brand Y", "confidence": 0.8}]. If no products are found, return an empty array.`
+                  text: `Identify all distinct ${productType} products visible in the image. For each product, also identify any health/nutritional claims visible on the packaging. Return a single JSON array, where each element is an object with 'name', 'brand', 'confidence', and 'claims' fields. The 'claims' field should be an array of strings containing any visible claims like "High Protein", "Gluten Free", "Non-GMO", "Organic", "Keto", "Sugar Free", "High Fiber", "Probiotic", "Prebiotic", "Antioxidant", "Vitamin C", "Calcium", "Iron", etc. Only return the array, no extra text. Example: [{"name": "Product A", "brand": "Brand X", "confidence": 0.9, "claims": ["High Protein", "Gluten Free"]}, {"name": "Product B", "brand": "Brand Y", "confidence": 0.8, "claims": ["Organic", "Non-GMO"]}]. If no products are found, return an empty array.`
                 },
                 {
                   type: "image_url",
@@ -82,7 +82,7 @@ export const processImageWithVision = async (
 
       // Gemini expects base64 image, not a URL
       // If imageData is a URL, you need to fetch and convert it to base64 before calling this function
-      const geminiPrompt = `Identify all distinct ${productType} products visible in the image. Return a single JSON array, where each element is an object with 'name', 'brand', and 'confidence' fields. Only return the array, no extra text. Example: [{"name": "Product A", "brand": "Brand X", "confidence": 0.9}, {"name": "Product B", "brand": "Brand Y", "confidence": 0.8}]. If no products are found, return an empty array.`;
+      const geminiPrompt = `Identify all distinct ${productType} products visible in the image. For each product, also identify any health/nutritional claims visible on the packaging. Return a single JSON array, where each element is an object with 'name', 'brand', 'confidence', and 'claims' fields. The 'claims' field should be an array of strings containing any visible claims like "High Protein", "Gluten Free", "Non-GMO", "Organic", "Keto", "Sugar Free", "High Fiber", "Probiotic", "Prebiotic", "Antioxidant", "Vitamin C", "Calcium", "Iron", etc. Only return the array, no extra text. Example: [{"name": "Product A", "brand": "Brand X", "confidence": 0.9, "claims": ["High Protein", "Gluten Free"]}, {"name": "Product B", "brand": "Brand Y", "confidence": 0.8, "claims": ["Organic", "Non-GMO"]}]. If no products are found, return an empty array.`;
 
       const response = await axios.post(
         `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
@@ -143,6 +143,7 @@ export const processImageWithVision = async (
       brand: product.brand || "Unknown brand",
       confidence: product.confidence || 0.8,
       imageUrl: imageData,
+      claims: product.claims || [],
       nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0, servingSize: "" },
       timestamp: new Date().toISOString(),
     }));
