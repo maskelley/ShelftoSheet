@@ -5,6 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import { ProductData } from "@/types/products";
 import { processImageWithType } from "@/utils/imageProcessingUtils";
 import { exportMacroCSV } from "@/utils/exportMacroCSV";
+import { fetchNutritionInfo } from "@/utils/nutritionUtils";
 import { FolderOpen, Download } from "lucide-react";
 
 interface BulkImageProcessorProps {
@@ -57,7 +58,7 @@ const BulkImageProcessor: React.FC<BulkImageProcessorProps> = ({ provider }) => 
       const file = imageFiles[i];
       setStatus(prev => ({
         ...prev,
-        current: file.name,
+        current: `Processing ${file.name}...`,
         completed: i
       }));
 
@@ -65,30 +66,52 @@ const BulkImageProcessor: React.FC<BulkImageProcessorProps> = ({ provider }) => 
         // Convert file to base64
         const base64 = await fileToBase64(file);
         
-        // Process the image
-        await new Promise<void>((resolve, reject) => {
+        // Process the image with AI vision
+        const detectedProducts = await new Promise<ProductData[]>((resolve, reject) => {
           processImageWithType(
             base64,
             null, // Let AI detect product type
-            (products) => {
-              allDetectedProducts.push(...products);
-              setAllProducts([...allDetectedProducts]); // Update UI in real-time
-              resolve();
-            },
-            (error) => {
-              setStatus(prev => ({
-                ...prev,
-                errors: [...prev.errors, `${file.name}: ${error instanceof Error ? error.message : String(error)}`]
-              }));
-              resolve(); // Continue processing other images
-            },
+            (products) => resolve(products),
+            (error) => reject(error),
             () => {}, // setIsProcessing - we'll handle this ourselves
             provider
           );
         });
 
-        // Small delay to prevent overwhelming the API
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Enrich each product with nutrition info (same as single image workflow)
+        setStatus(prev => ({
+          ...prev,
+          current: `Fetching nutrition for ${file.name}...`
+        }));
+
+        const enrichedProducts = await Promise.all(
+          detectedProducts.map(async (product) => {
+            try {
+              const nutrition = await fetchNutritionInfo(product.name, product.brand);
+              return {
+                ...product,
+                nutrition: nutrition
+                  ? {
+                      calories: nutrition.calories ?? 0,
+                      protein: nutrition.protein ?? 0,
+                      carbs: nutrition.carbohydrates ?? 0,
+                      fat: nutrition.fat ?? 0,
+                      servingSize: nutrition.servingSize ?? "",
+                    }
+                  : { calories: 0, protein: 0, carbs: 0, fat: 0, servingSize: "" },
+              };
+            } catch (nutritionError) {
+              console.error(`Failed to fetch nutrition for ${product.name}:`, nutritionError);
+              return product; // Keep original product with default nutrition
+            }
+          })
+        );
+
+        allDetectedProducts.push(...enrichedProducts);
+        setAllProducts([...allDetectedProducts]); // Update UI in real-time
+
+        // Increased delay to prevent overwhelming both AI and nutrition APIs
+        await new Promise(resolve => setTimeout(resolve, 1500));
 
       } catch (error) {
         setStatus(prev => ({
