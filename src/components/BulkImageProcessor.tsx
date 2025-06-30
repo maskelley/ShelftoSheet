@@ -87,7 +87,10 @@ const BulkImageProcessor: React.FC<BulkImageProcessorProps> = ({ provider }) => 
         const enrichedProducts = await Promise.all(
           detectedProducts.map(async (product) => {
             try {
+              console.log(`Fetching nutrition for: ${product.name} (${product.brand})`);
               const nutrition = await fetchNutritionInfo(product.name, product.brand);
+              console.log(`Nutrition result for ${product.name}:`, nutrition);
+              
               return {
                 ...product,
                 nutrition: nutrition
@@ -143,7 +146,19 @@ const BulkImageProcessor: React.FC<BulkImageProcessorProps> = ({ provider }) => 
       alert("No products to export.");
       return;
     }
-    exportMacroCSV(allProducts, `bulk_macro_export_${new Date().toISOString().split('T')[0]}`);
+    
+    // Debug: Log the products being exported
+    console.log("Exporting products:", allProducts.map(p => ({
+      name: p.name,
+      brand: p.brand,
+      nutrition: p.nutrition
+    })));
+    
+    // Create unique filename with timestamp
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const filename = `bulk_macro_export_${timestamp}`;
+    
+    exportMacroCSV(allProducts, filename);
   };
 
   const progressPercentage = status.total > 0 ? (status.completed / status.total) * 100 : 0;
@@ -185,6 +200,17 @@ const BulkImageProcessor: React.FC<BulkImageProcessorProps> = ({ provider }) => 
                 <p className="text-green-700">
                   Found {allProducts.length} products across {status.total} images.
                 </p>
+                
+                {/* Debug info showing nutrition data */}
+                <div className="mt-2 p-2 bg-blue-50 rounded text-sm">
+                  <p className="font-medium text-blue-800">Sample nutrition data:</p>
+                  {allProducts.slice(0, 3).map((product, idx) => (
+                    <div key={idx} className="text-blue-700">
+                      {product.name}: Carbs: {product.nutrition.carbs}g, Protein: {product.nutrition.protein}g, Fat: {product.nutrition.fat}g
+                    </div>
+                  ))}
+                </div>
+                
                 {status.errors.length > 0 && (
                   <div className="mt-2">
                     <p className="text-red-600 font-medium">{status.errors.length} errors occurred:</p>
